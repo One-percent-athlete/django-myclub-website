@@ -1,0 +1,51 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+
+    <div class="card">
+        <div class="card-header text-bg-dark fs-4">
+            {% if searched %}
+                You Searched For "{{ searched }}"
+            {% else %}
+                Insert Your Keywords Below
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'search_venues' %}">
+                {% csrf_token %}
+                <input class="form-control me-2" type="search" placeholder="Search Venues" aria-label="Search" name="searched">
+                <br>
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <br>
+
+{% if searched %}
+    <!-- <h4>You Searched For "{{ searched }}"</h4> -->
+    <br>
+    {% for venue in venues %}
+        <div class="card">
+            <div class="card-header text-bg-dark fs-4">{{ venue }}</div>
+            <div class="card-body">
+                <p>Phone: {{ venue.phone }}</p>
+                <p>Email: {{ venue.email_address }}</p>
+                <p>Web: <a href="{{ venue.web }}">{{ venue.web }}</a></p>
+                <p>Address: {{ venue.address }} <small>(Zip Code:{{ venue.zip_code }})</small></p>
+                <p>Owner: {{ venue_owner.first_name }}  {{ venue_owner.last_name }}</p>
+                <p>Owner's Email: {{ venue_owner.email }}</p>
+                {% if user.is_authenticated %}
+                    {% if user.id == venue.owner %}
+                        <a href="{% url 'update_venue' venue.id %}" class="btn btn-outline-secondary btn-sm">Update</a>
+                        <a href="{% url 'delete_venue' venue.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <br/><br/>
+    {% endfor %}
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+
+{% if searched %}
+    <h5>You Searched For "{{ searched }}"</h5>
+    <h4>Your Result In Venues</h4>
+    <br>
+    {% for venue in venues %}
+        <div class="card">
+            <div class="card-header text-bg-dark fs-4">{{ venue }}</div>
+            <div class="card-body">
+                <p>Phone: {{ venue.phone }}</p>
+                <p>Email: {{ venue.email_address }}</p>
+                <p>Web: <a href="{{ venue.web }}">{{ venue.web }}</a></p>
+                <p>Address: {{ venue.address }} <small>(Zip Code:{{ venue.zip_code }})</small></p>
+                <p>Owner: {{ venue_owner.first_name }}  {{ venue_owner.last_name }}</p>
+                <p>Owner's Email: {{ venue_owner.email }}</p>
+                {% if user.is_authenticated %}
+                    {% if user.id == venue.owner %}
+                        <a href="{% url 'update_venue' venue.id %}" class="btn btn-outline-secondary btn-sm">Update</a>
+                        <a href="{% url 'delete_venue' venue.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <br/><br/>
+    {% endfor %}
+
+    <h4>Your Result In Events</h4>
+    <br>
+    {% for event in events %}
+        <div class="card">
+            <div class="card-header text-bg-dark fs-4">{{ event }}</div>
+                <div class="card-body">
+                    <h5 class="card-title"><a href="{{ event.venue.web }}">Venue: {{ event.venue }}</a><br>
+                    </h5><small>Address: {{ event.venue.address }}</small>
+                    <p class="card-text">
+                        <p>Date: {{ event.event_date }}</p>
+                        <ul>
+                            <li><p>Host: {{ event.manager }}</p></li>
+                            <li><p>Description: {{ event.description }}</p></li>
+                            <li><p>Attendees: </p></li>
+                            {% for user in  event.attendees.all %}
+                                {{ user }}, contact: {{ user.email }}<br>
+                            {% endfor %}
+                        </ul>
+                    </p>
+                        {% if user.is_authenticated %}
+                            {% if user == event.manager %}
+                                <hr>
+                                <a href="{% url 'update_event' event.id %}" class="btn btn-outline-secondary btn-sm">Update Event</a>
+                                <a href="{% url 'delete_event' event.id %}" class="btn btn-outline-danger btn-sm">Delete Event</a>
+                            {% endif %}
+                        {% endif %}
+                </div>
+        </div>
+        <br/><br/>
+    {% endfor %}
+
+{% else %}
+    <h4>You Forgot To Search For A Venue</h4>
+{% endif %}
+
+{% endblock %}

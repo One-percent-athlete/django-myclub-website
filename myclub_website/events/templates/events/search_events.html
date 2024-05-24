@@ -1,0 +1,56 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header text-bg-dark fs-4">
+            {% if searched %}
+                You Searched For "{{ searched }}"
+            {% else %}
+                Insert Your Keywords Below
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'search_events' %}">
+                {% csrf_token %}
+                <input class="form-control me-2" type="search" placeholder="Search Events" aria-label="Search" name="searched">
+                <br>
+                <button class="btn btn-outline-secondary" type="submit">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <br>
+
+{% if searched %}
+    {% for event in events %}
+        <div class="card">
+            <div class="card-header text-bg-dark fs-4">{{ event }}</div>
+            <div class="card-body">
+                <h5 class="card-title"><a href="{{ event.venue.web }}">Venue: {{ event.venue }}</a><br>
+                </h5><small>Address: {{ event.venue.address }}</small>
+                <p class="card-text">
+                    <p>Date: {{ event.event_date }}</p>
+                    <ul>
+                        <li><p>Host: {{ event.manager }}</p></li>
+                        <li><p>Description: {{ event.description }}</p></li>
+                        <li><p>Attendees: </p></li>
+                        {% for user in  event.attendees.all %}
+                            {{ user }}, contact: {{ user.email }}<br>
+                        {% endfor %}
+                    </ul>
+                </p>
+                    {% if user.is_authenticated %}
+                        {% if user == event.manager %}
+                            <hr>
+                            <a href="{% url 'update_event' event.id %}" class="btn btn-outline-secondary btn-sm">Update Event</a>
+                            <a href="{% url 'delete_event' event.id %}" class="btn btn-outline-danger btn-sm">Delete Event</a>
+                        {% endif %}
+                    {% endif %}
+            </div>
+        </div>
+        <br/><br/>
+    {% endfor %}
+{% endif %}
+
+
+{% endblock %}

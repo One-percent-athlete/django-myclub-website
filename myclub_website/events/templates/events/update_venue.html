@@ -1,0 +1,29 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+{% if user.is_authenticated %}
+    {% if user.id == venue.owner or user.is_superuser %}
+        <h1 style="margin-bottom: 50px;">{{ venue.name }}</h1>
+        <br/>
+        <form action="" method=POST>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Update" class="btn btn-secondary">
+        </form>
+    {% else %}
+        <h1>Access Denied</h1>
+        <br>
+        <h4>You Are Not Authorised To Update This Page...</h4>
+    {% endif %}
+{% else %}
+<h1>Access Denied</h1>
+<br>
+<h4>You Have To Login Or Register...</h4>
+    <br>
+    <p class="btn btn-outline-secondary"><a class="nav-link" href="{% url 'register' %}">Register Here</a></p>
+    <br>
+    <p class="btn btn-outline-secondary"><a class="nav-link" href="{% url 'login' %}">Login Here</a></p>
+{% endif %}
+
+
+{% endblock %}
