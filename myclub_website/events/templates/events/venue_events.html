@@ -1,0 +1,27 @@
+{% extends 'events/base.html' %}
+
+{% block content %}
+    <h2 style="margin-bottom: 30px;">Events at {{ venue }}</h2>
+    <br/>
+    <table class="table table-striped table-hover table-bordered-colums">
+    {% for event in events %}
+        {% if event.approved %}
+        <tr>
+            <td>
+                <h5><a href="{% url 'show_event' event.id %}">{{ event }}</a></h5>
+            </td>
+            {% if user.is_authenticated %}
+                {% if user.is_superuser %}
+                    <td align="right">
+                        <a href="{% url 'update_event' event.id %}" class="btn btn-outline-secondary btn-sm">Update</a>
+                        <a href="{% url 'delete_event' event.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+                    </td>
+                {% endif %}
+            {% endif %}
+        </tr>
+        {% endif %}
+    {% endfor %}
+    </table>
+    <br><hr>
+
+{% endblock %}

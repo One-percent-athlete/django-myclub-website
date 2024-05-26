@@ -10,11 +10,32 @@
                 <p>Address: {{ venue.address }} <small>(Zip Code:{{ venue.zip_code }})</small></p>
                 <p>Owner: {{ venue_owner.first_name }}  {{ venue_owner.last_name }}</p>
                 <p>Owner's Email: {{ venue_owner.email }}</p>
+                {% if venue.venue_image %}
+                    <img src="{{ venue.venue_image.url }}" width="200">
+                {% endif %}
                 {% if user.is_authenticated %}
                     {% if user.id == venue.owner %}
+                        <br>
                         <a href="{% url 'update_venue' venue.id %}" class="btn btn-outline-secondary btn-sm">Update</a>
                         <a href="{% url 'delete_venue' venue.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
                     {% endif %}
+                {% endif %}
+                <br><hr>
+                {% if events %}
+                <h5 style="margin-bottom: 20px;">Events at {{ venue }}</h5>
+                <table class="table table-striped table-hover table-bordered-colums">
+                    {% for event in events %}
+                        {% if event.approved %}
+                        <tr>
+                            <td>
+                                <h5><a href="{% url 'show_event' event.id %}">{{ event }}</a></h5>
+                            </td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h6>Currently There Is No Event Scheduled Here.</h6>
                 {% endif %}
             </div>
         </div>

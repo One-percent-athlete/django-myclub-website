@@ -1,9 +1,7 @@
 {% extends 'events/base.html' %}
 
 {% block content %}
-    <h1 style="margin-bottom: 50px;">Events</h1>
-    {% for event in event_list %}
-        {% if event.approved %}
+    {% if event.approved %}
             <div class="card">
                 <div class="card-header text-bg-dark fs-4">{{ event }}</div>
                 <div class="card-body">
@@ -14,7 +12,8 @@
                         <ul>
                             {% if event.Days_till > 0 %}
                                 <li><p>Days till event: {{ event.Days_till }} Days</p></li>
-                            {% else %}
+                    
+                                {% else %}
                                 <li><p>Days till event:  {{ event.Is_past }}</p></li>
                             {% endif %}  
                             <!-- <li><p>Days till event: {{ event.Days_till }}</p></li> -->
@@ -36,6 +35,5 @@
                 </div>
             </div>
             <br/><br/>
-        {% endif %}
-    {% endfor %}
+    {% endif %}
 {% endblock %}

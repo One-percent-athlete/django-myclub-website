@@ -20,7 +20,6 @@ def home(request):
     current_year = now.year
     return render(request, "events/home.html", {"current_year": current_year})
 
-
 def calender(request, year=datetime.now().year, month=datetime.now().strftime('%B')):
     month = month.capitalize()
     month_number = list(calendar.month_name).index(month)
@@ -48,6 +47,55 @@ def calender(request, year=datetime.now().year, month=datetime.now().strftime('%
         "events": events
         })
 
+
+def dashboard(request):
+    event_list = Event.objects.all().order_by("event_date", "name")
+    venue_list = Venue.objects.all()
+    event_count = Event.objects.all().count()
+    venue_count = venue_list.count()
+    user_count = User.objects.all().count()
+
+    now = datetime.now()
+    current_year = now.year
+
+    if request.user.is_superuser:
+        if request.method == "POST":
+            id_list = request.POST.getlist("boxes")
+
+            event_list.update(approved=False)
+
+            for id in id_list:
+                Event.objects.filter(pk=int(id)).update(approved=True)
+
+            messages.success(request, ("Event Approval Updated Successfully!"))
+            return redirect("dashboard")
+        else:
+            return render(request,
+                "events/dashboard.html", {
+                "event_list": event_list,
+                "venue_list": venue_list,
+                "event_count": event_count,
+                "venue_count": venue_count,
+                "user_count": user_count,
+                "current_year": current_year
+                })
+    else:
+        messages.success(request, ("You Don't Have The Permission..."))
+        return redirect("home")
+
+def venue_events(request, venue_id):
+    venue = Venue.objects.get(pk=venue_id)
+    events = venue.event_set.all()
+    if events:
+        return render(request, 
+            "events/venue_events.html", {
+                "venue": venue,
+                "events": events,
+        })
+    else:
+        messages.success(request, ("Currently There Is No Event At The Venue..."))
+        return redirect("dashboard")
+
 def all_events(request):
     event_list = Event.objects.all().order_by("event_date", "name")
     now = datetime.now()
@@ -58,6 +106,7 @@ def all_events(request):
         "event_list": event_list,
         "current_year": current_year
         })
+
 
 def search_events(request):
     now = datetime.now()
@@ -76,7 +125,18 @@ def search_events(request):
         return render(request, 
             "events/search_events.html", {
             "current_year": current_year, 
-            })    
+            }) 
+     
+def show_event(request, event_id):
+    event = Event.objects.get(pk=event_id)
+    now = datetime.now()
+    current_year = now.year
+
+    return render(request,
+        "events/show_event.html", {
+        "event": event,
+        "current_year": current_year
+        })  
 
 def my_events(request):
     now = datetime.now()
@@ -196,12 +256,15 @@ def search_venues(request):
 def show_venue(request, venue_id):
     venue = Venue.objects.get(pk=venue_id)
     venue_owner = User.objects.get(pk=venue.owner)
+    events = venue.event_set.all()
+    
     now = datetime.now()
     current_year = now.year
 
     return render(request,
         "events/show_venue.html", {
         "venue": venue,
+        "events": events,
         "venue_owner": venue_owner,
         "current_year": current_year
         })
@@ -209,7 +272,7 @@ def show_venue(request, venue_id):
 def add_venue(request):
     submitted = False
     if request.method == "POST":
-        form = VenueForm(request.POST)
+        form = VenueForm(request.POST, request.FILES)
         if form.is_valid():
             venue = form.save(commit=False)
             venue.owner = request.user.id
@@ -228,7 +291,7 @@ def add_venue(request):
 
 def update_venue(request, venue_id):
     venue = Venue.objects.get(pk=venue_id)
-    form = VenueForm(request.POST or None, instance=venue)
+    form = VenueForm(request.POST or None, request.FILES or None, instance=venue)
     if form.is_valid():
         form.save()
         return redirect('venues')
